@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t ktiwari23/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run ktiwari23/react-test npm test -- --coverage
+
+after_install:
+  - docker build -t ktiwari23/multi-client ./client
+  - docker build -t ktiwari23/multi-nginx ./nginx
+  - docker build -t ktiwari23/multi-server ./server
+  - docker build -t ktiwari23/multi-worker ./worker
+  # Login to Docker-CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push ktiwari23/multi-client
+  - docker push ktiwari23/multi-nginx
+  - docker push ktiwari23/multi-server
+  - docker push ktiwari23/multi-worker
